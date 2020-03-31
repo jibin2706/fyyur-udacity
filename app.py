@@ -9,7 +9,7 @@ from flask import Flask, render_template, request, Response, flash, redirect, ur
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from sqlalchemy import desc
+from sqlalchemy import desc, or_
 import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
@@ -141,7 +141,9 @@ def venues():
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
   search_term = request.form['search_term']
-  search_result = Venue.query.filter(Venue.name.ilike(f'%{search_term}%')).all()
+  search_result = Venue.query.filter(or_(Venue.name.ilike(f'%{search_term}%'), 
+  Venue.city.concat(', ').concat(Venue.state).like(f'{search_term}%'))).all()
+
   response = {
     "count": len(search_result),
     "data": [{'id': venue.id, 'name': venue.name, 'num_upcoming_shows': len(checkFutureShows(venue.shows)) } for venue in search_result]
@@ -257,7 +259,9 @@ def artists():
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
   search_term = request.form['search_term']
-  search_result = Artist.query.filter(Artist.name.ilike(f'%{search_term}%')).all()
+  search_result = Artist.query.filter(or_(Artist.name.ilike(f'%{search_term}%'), 
+  Artist.city.concat(', ').concat(Artist.state).like(f'{search_term}%'))).all()
+
   response = {
     "count": len(search_result),
     "data": [{'id': artist.id, 'name': artist.name, 'num_upcoming_shows': len(checkFutureShows(artist.shows)) } for artist in search_result]
