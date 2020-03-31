@@ -5,15 +5,28 @@
 <h3>{{ area.city }}, {{ area.state }}</h3>
 	<ul class="items">
 		{% for venue in area.venues %}
-		<li>
+		<li style="display: flex; align-items: center;">
 			<a href="/venues/{{ venue.id }}">
 				<i class="fas fa-music"></i>
 				<div class="item">
 					<h5>{{ venue.name }}</h5>
 				</div>
 			</a>
+			<button data-id={{ venue.id }} onclick="deleteVenue(event)" class="delete-button">🗑️</button>
 		</li>
 		{% endfor %}
 	</ul>
+	<script>
+		function deleteVenue (event) {
+			const venueId = parseInt(event.target.dataset.id)
+			fetch(`/venues/${venueId}`, {
+				method: 'DELETE'
+			}).then(response => {
+				window.location = '/'
+			}).catch(err => {
+				console.log(err)
+			})
+		}
+	</script>
 {% endfor %}
 {% endblock %}

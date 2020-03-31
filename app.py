@@ -122,7 +122,6 @@ def venues():
     
     result_venues = []
     for venue in venues:
-      print(venue.name, len(venue.shows), len(checkFutureShows(venue.shows)))
       result_venues.append({'id': venue.id, 'name': venue.name, 'num_upcoming_shows': len(checkFutureShows(venue.shows))})
 
     result.append({'city': city, 'state': state, 'venues': result_venues})
@@ -213,12 +212,25 @@ def create_venue_submission():
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
-  # TODO: Complete this endpoint for taking a venue_id, and using
-  # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
+  try:
+    venue = Venue.query.get(venue_id)
+    name = venue.name
+    db.session.delete(venue)
+    db.session.commit()
+    flash('Venue ' + name + ' was successfully deleted!')
 
-  # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
-  # clicking that button delete it from the db then redirect the user to the homepage
-  return None
+  except Exception as e:
+    print(e)
+    db.session.rollback()
+    flash('Venue couldn\'t be deleted.')
+
+  finally:
+    db.session.close()
+    redirect('/', code=302)
+
+  return {}
+
+
 
 #  Artists
 #  ----------------------------------------------------------------
@@ -422,7 +434,7 @@ def shows():
       "artist_image_link": show.artist.image_link,
     }
     data.append(result)
-  print(data)
+
   return render_template('pages/shows.html', shows=data)
 
 @app.route('/shows/create')
