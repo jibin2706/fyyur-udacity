@@ -44,7 +44,7 @@ class Venue(db.Model):
     website = db.Column(db.String(120), default='')
     seeking_talent = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.String(500), default='')
-    shows = db.relationship("Show", backref="venue", lazy="joined")
+    shows = db.relationship("Show", backref="venue", lazy=True, cascade="all, delete-orphan")
 
     def __repr__(self):
       return f'<Venue id:{self.id}> name:{self.name}>'
